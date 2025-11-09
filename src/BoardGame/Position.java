@@ -5,7 +5,8 @@ public class Position {
     private Integer row;
     private Integer column;
 
-    public Position(){}
+    public Position() {
+    }
 
     public Position(Integer column, Integer row) {
         this.column = column;
