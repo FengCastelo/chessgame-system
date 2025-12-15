@@ -4,7 +4,7 @@ import BoardGame.Board;
 import Chess.ChessPiece;
 import Chess.enums.Color;
 
-public class Queen extends ChessPiece {
+public abstract class Queen extends ChessPiece {
 
     public Queen(Board board, Color color) {
         super(board, color);

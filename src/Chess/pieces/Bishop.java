@@ -4,7 +4,7 @@ import BoardGame.Board;
 import Chess.ChessPiece;
 import Chess.enums.Color;
 
-public class Bishop extends ChessPiece {
+public abstract class Bishop extends ChessPiece {
 
     public Bishop(Board board, Color color) {
         super(board, color);
