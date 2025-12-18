@@ -5,12 +5,10 @@ import Chess.ChessPiece;
 import Chess.ChessPosition;
 import Chess.enums.Color;
 
-import javax.rmi.ssl.SslRMIClientSocketFactory;
 import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class UI {
 
@@ -67,8 +65,11 @@ public class UI {
         System.out.println();
         printCapturedPieces(captured);
         System.out.println();
-        System.out.println("\n Turn: " + chessMatch.getTurn());
-        System.out.println("\n Waiting for player: " + chessMatch.getCurrentPlayer());
+        System.out.println("Turn: " + chessMatch.getTurn());
+        System.out.println("\n Waiting player: " + chessMatch.getCurrentPlayer());
+        if (chessMatch.getCheck()) {
+            System.out.println(" YOUR ARE IN CHECK! ");
+        }
     }
 
     public static void printBoard(ChessPiece[][] pieces, boolean[][] possibleMoves) {
