@@ -7,6 +7,7 @@ import Chess.Exceptions.ChessException;
 import Chess.enums.Color;
 import Chess.pieces.*;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -19,6 +20,7 @@ public class ChessMatch {
     private boolean check;
     private boolean checkMate;
     private ChessPiece enPassantVulnerable;
+    private ChessPiece promoted;
 
     private final List<Piece> piecesOnTheBoard = new ArrayList<>();
     private final List<Piece> capturedPieces = new ArrayList<>();
@@ -51,6 +53,10 @@ public class ChessMatch {
         return enPassantVulnerable;
     }
 
+    public ChessPiece getPromoted() {
+        return promoted;
+    }
+
     public ChessPiece[][] getPieces() {
         ChessPiece[][] mat = new ChessPiece[board.getRows()][board.getColumns()];
         for (int i = 0; i < board.getRows(); i++) {
@@ -63,14 +69,14 @@ public class ChessMatch {
 
     public boolean[][] possibleMoves(ChessPosition sourcePosition) {
         Position position = sourcePosition.toPosition();
-        validadeSourcePosition(position);
+        validateSourcePosition(position);
         return board.piece(position).possibleMoves();
     }
 
     public ChessPiece performChessMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
         Position source = sourcePosition.toPosition();
         Position target = targetPosition.toPosition();
-        validadeSourcePosition(source);
+        validateSourcePosition(source);
         validateTargetPosition(source, target);
         Piece capturedPiece = makeMove(source, target);
 
@@ -80,6 +86,15 @@ public class ChessMatch {
         }
 
         ChessPiece movedPiece = (ChessPiece) board.piece(target);
+
+        //#specialmove - Promotion
+        promoted = null;
+        if (movedPiece instanceof Pawn) {
+            if ((movedPiece.getColor() == Color.WHITE && target.getRow() == 0) || (movedPiece.getColor() == Color.BLACK && target.getRow() == 7)) {
+                promoted = (ChessPiece) board.piece(target);
+                promoted = replacePromotedPiece("R");
+            }
+        }
 
         check = (testCheck(opponent(currentPlayer))) ? true : false;
 
@@ -95,6 +110,34 @@ public class ChessMatch {
         }
 
         return (ChessPiece) capturedPiece;
+    }
+
+    public ChessPiece replacePromotedPiece(String type) {
+        if (promoted == null) {
+            throw new IllegalStateException("There's no piece to be promoted");
+        }
+        if (!type.equals("R") && !type.equals("C") && !type.equals("T") && !type.equals("B")) {
+            throw new InvalidParameterException("Invalid type for promotion");
+        }
+
+        Position pos = promoted.getChessPosition().toPosition();
+        Piece p = board.removePiece(pos);
+        piecesOnTheBoard.remove(p);
+
+        ChessPiece newPiece = newPiece(type, promoted.getColor());
+        board.placePiece(newPiece, pos);
+        piecesOnTheBoard.add(newPiece);
+
+        return newPiece;
+    }
+
+    private ChessPiece newPiece(String type, Color color) {
+        return switch (type) {
+            case "B" -> new Bishop(board, color);
+            case "R" -> new Queen(board, color);
+            case "C" -> new Knight(board, color);
+            default -> new Rook(board, color);
+        };
     }
 
     private Piece makeMove(Position source, Position target) {
@@ -177,7 +220,7 @@ public class ChessMatch {
         // #specialmove en passant
         if (p instanceof Pawn) {
             if (!Objects.equals(source.getColumn(), target.getColumn()) && capturedPiece == enPassantVulnerable) {
-                ChessPiece pawn = (ChessPiece)board.removePiece(target);
+                ChessPiece pawn = (ChessPiece) board.removePiece(target);
                 Position pawnPosition;
                 if (p.getColor() == Color.WHITE) {
                     pawnPosition = new Position(3, target.getColumn());
@@ -189,7 +232,7 @@ public class ChessMatch {
         }
     }
 
-    private void validadeSourcePosition(Position position) {
+    private void validateSourcePosition(Position position) {
         if (!board.thereIsAPiece(position)) {
             throw new ChessException("There's no piece on source position.");
         }
