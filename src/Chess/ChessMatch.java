@@ -7,7 +7,6 @@ import Chess.Exceptions.ChessException;
 import Chess.enums.Color;
 import Chess.pieces.*;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -96,7 +95,7 @@ public class ChessMatch {
             }
         }
 
-        check = (testCheck(opponent(currentPlayer))) ? true : false;
+        check = testCheck(opponent(currentPlayer));
 
         if (testCheckMate(opponent(currentPlayer))) {
             checkMate = true;
@@ -117,7 +116,7 @@ public class ChessMatch {
             throw new IllegalStateException("There's no piece to be promoted");
         }
         if (!type.equals("R") && !type.equals("C") && !type.equals("T") && !type.equals("B")) {
-            throw new InvalidParameterException("Invalid type for promotion");
+            return promoted;
         }
 
         Position pos = promoted.getChessPosition().toPosition();
